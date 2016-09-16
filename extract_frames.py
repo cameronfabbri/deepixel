@@ -6,10 +6,17 @@ success,image = vidcap.read()
 count = 0
 success = True
 
-# only save every 
-while success:
-   success,image = vidcap.read()
-   cv2.imwrite("temp/frame%d.png" % count, image)     # save frame as JPEG file
-   count += 1
-   print count
+# should probably give each show a show id
+show_id = 1
 
+# OR DRAW SPONGEBOB IN THE ANIMATION STYLE OF ARCHER OR ADVENTURE TIME
+# so like train the shit out of archer, then pass in spongebob
+
+# only save every two seconds
+while success:
+   success, image = vidcap.read()
+   if count %60 == 0:
+   	cv2.imwrite("images/"+str(show_id)+"_frame_%d.png" % count, image)
+   	print "Saving frame " + str(count)
+   	count += 1
+   count += 1
