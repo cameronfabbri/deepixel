@@ -24,8 +24,13 @@ assumes the directory structure:
 tv_show_path    = sys.argv[1]
 download_folder = sys.argv[2]
 
+show_name = tv_show_path.split("/")[-2]
+
 for root, dirs, files in os.walk(tv_show_path):
     for season in dirs:
+        if season == "Adventure Time Season 4":
+            print "Skipping!!!"
+            continue
         for r, d, files in os.walk(root+season):
             for episode in files:
                 episode_frame_count = 0
@@ -34,34 +39,24 @@ for root, dirs, files in os.walk(tv_show_path):
                 vidcap = cv2.VideoCapture(episode)
                 success = True
                 try:
-                    os.mkdir(download_folder+episode_name)
+                    os.mkdir(download_folder+show_name)
+                    os.mkdir(download_folder+show_name+"/"+season)
+                    os.mkdir(download_folder+show_name+"/"+season+"/"+episode_name)
                 except:
                     pass
                 while success:
                     success, image = vidcap.read()
-                    if episode_frame_count%60 == 0:
+                    # extract every second of video
+                    if episode_frame_count%30 == 0:
                         print "Saving frame " + str(episode_frame_count)
-                        cv2.imwrite(download_folder+episode_name+"/"+str(episode_frame_count)+".jpg", image)
+                        cv2.imwrite(download_folder+show_name+"/"+season+"/"+episode_name+"/"+str(episode_frame_count)+".png", image)
                         episode_frame_count += 1
                     else:
                         episode_frame_count += 1
+                print
                 print "Done with episode " + str(episode_name)
+                print
+        print
         print "Done with season " + str(season)
-        exit()
-
-
-            
-
-# OR DRAW SPONGEBOB IN THE ANIMATION STYLE OF ARCHER OR ADVENTURE TIME
-# so like train the shit out of archer, then pass in spongebob
-
-# only save every two seconds
-"""
-while success:
-   success, image = vidcap.read()
-   if count %60 == 0:
-   	cv2.imwrite("images/"+str(show_id)+"_frame_%d.png" % count, image)
-   	print "Saving frame " + str(count)
-   	count += 1
-   count += 1
-"""
+        print
+print "Done with show " + str(show_name)
