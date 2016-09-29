@@ -13,5 +13,7 @@ after the network learns to depixelate the image, it can be applied to older vid
 Seen from left to right:
 Original image, pixelated image, original Gameboy Color image
 
-![origanl](https://github.com/cameronfabbri/deepixel/blob/master/images/output-original.png?raw=true) ![pixelated](https://github.com/cameronfabbri/deepixel/blob/master/images/output-6.png?raw=true) ![gbc](http://199.101.98.242/media/images/33501-Donkey_Kong_Country_(Europe)_(En,Fr,De)-3.jpg)
+![origanl](https://github.com/cameronfabbri/deepixel/blob/master/images/output-original.png?raw=true =100x200)
+![pixelated](https://github.com/cameronfabbri/deepixel/blob/master/images/output-6.png?raw=true =100x200) 
+![gbc](http://199.101.98.242/media/images/33501-Donkey_Kong_Country_(Europe)_(En,Fr,De)-3.jpg =100x200)
 
