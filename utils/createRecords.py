@@ -37,8 +37,7 @@ def run(folder, dest_dir):
             fileList.append(os.path.join(d,filename))
 
    for image_name in tqdm(fileList):
-      try:
-      # read image
+      
       try:
          img = cv2.imread(image_name)
       except:
@@ -91,6 +90,8 @@ def run(folder, dest_dir):
       except:
          raise
       count += 1
+   if count == 200:
+      exit()
    print "Created " + str(count) + " records"
 
 if __name__ == "__main__":
