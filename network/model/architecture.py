@@ -82,7 +82,7 @@ def deconv(inputs, stride, out_shape, kernel_size, num_features, idx):
       d_conv = tf.nn.conv2d_transpose(inputs, filter_, output_shape=out_shape, strides=strides, padding='SAME') 
       return tf.maximum(FLAGS.alpha*d_conv,d_conv,name=str(idx))
 
-def inference(images, name):
+def inference(batch_size, images, name):
 
            # input, kernel size, stride, num_features, num_
    #conv1 = tf.nn.dropout(images, .8)
@@ -118,15 +118,15 @@ def inference(images, name):
 
    # perform deconvolutions
 
-   out_shape = tf.pack([10, 320, 288, 32])
+   out_shape = tf.pack([batch_size, 320, 288, 32])
    d_conv1 = deconv(conv4, 2, out_shape, 5, 32, '5') 
    print d_conv1
 
-   out_shape = tf.pack([10, 640, 576, 32])
+   out_shape = tf.pack([batch_size, 640, 576, 32])
    d_conv2 = deconv(d_conv1, 2, out_shape, 2, 32, '6')
    print d_conv2
 
-   out_shape = tf.pack([10, 1280, 1152, 3])
+   out_shape = tf.pack([batch_size, 1280, 1152, 3])
    d_conv3 = deconv(d_conv2, 2, out_shape, 7, 3, '7')
    print d_conv3
    

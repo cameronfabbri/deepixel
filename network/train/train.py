@@ -16,13 +16,14 @@ import time
 def train(checkpoint_dir, record_file, batch_size):
    with tf.Graph().as_default():
 
+      batch_size = int(batch_size)
       global_step = tf.Variable(0, name='global_step', trainable=False)
 
       train_size = 148623
 
       gameboy_images, hd_images = input_.inputs(record_file, batch_size, "train")
 
-      logits = architecture.inference(gameboy_images, "train")
+      logits = architecture.inference(batch_size, gameboy_images, "train")
 
       # loss is the l2 norm of my input vector (the image) and the output vector (generated image)
       loss = architecture.loss(hd_images, logits)
