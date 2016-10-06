@@ -8,7 +8,7 @@ import os
 import fnmatch
 
 in_shape  = (160,144)
-out_shape = (1280, 720)
+out_shape = (1280, 1152)
 
 # helper function
 def _bytes_feature(value):
@@ -27,7 +27,7 @@ def run(folder, dest_dir):
 
    record_writer = tf.python_io.TFRecordWriter(record)
 
-   folder = "/home/neptune/data_dir/games/"
+   #folder = "/home/neptune/data_dir/games/"
    pattern = "*.png"
    fileList = list()
 

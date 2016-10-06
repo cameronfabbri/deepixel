@@ -86,7 +86,8 @@ def inference(images, name):
 
            # input, kernel size, stride, num_features, num_
    #conv1 = tf.nn.dropout(images, .8)
-   conv1 = _conv_layer(images, 7, 2, 32, '1')
+   print images
+   conv1 = _conv_layer(images, 3, 1, 32, '1')
 
    conv2 = _conv_layer(conv1, 3, 1, 64, '2')
 
@@ -94,6 +95,7 @@ def inference(images, name):
    
    conv4 = _conv_layer(conv3, 3, 1, 256, '4')
    print conv4
+   print "here"
    '''
    print conv4
    exit()
@@ -116,27 +118,19 @@ def inference(images, name):
 
    # perform deconvolutions
 
-   out_shape = tf.pack([10, 64, 64, 32])
+   out_shape = tf.pack([10, 320, 288, 32])
    d_conv1 = deconv(conv4, 2, out_shape, 5, 32, '5') 
    print d_conv1
 
-   out_shape = tf.pack([10, 128, 128, 32])
+   out_shape = tf.pack([10, 640, 576, 32])
    d_conv2 = deconv(d_conv1, 2, out_shape, 2, 32, '6')
    print d_conv2
 
-   out_shape = tf.pack([10, 256, 256, 3])
+   out_shape = tf.pack([10, 1280, 1152, 3])
    d_conv3 = deconv(d_conv2, 2, out_shape, 7, 3, '7')
    print d_conv3
    
-   out_shape = tf.pack([10, 512, 512, 3])
-   d_conv4 = deconv(d_conv3, 2, out_shape, 7, 3, '8')
-   print d_conv4
-
-   out_shape = tf.pack([10, 1280, 720, 3])
-   d_conv5 = deconv(d_conv4, 2, out_shape, 7, 3, '9')
-   print d_conv5
-
-   return d_conv5
+   return d_conv3
 
 def loss (input_images, logits):
    error = tf.nn.l2_loss(input_images - logits)

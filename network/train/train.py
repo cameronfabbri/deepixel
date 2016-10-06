@@ -70,7 +70,7 @@ def train(checkpoint_dir, record_file, batch_size):
       epoch_num = step/(train_size/batch_size)
 
       while True:
-         _, loss_value, generated_image, imgs = sess.run([train_op, loss, logits, images])
+         _, loss_value, generated_image, imgs = sess.run([train_op, loss, logits, hd_images])
          print "Epoch: " + str(epoch_num) + " Step: " + str(sess.run(global_step)) + " Loss: " + str(loss_value)
          step += 1
          
