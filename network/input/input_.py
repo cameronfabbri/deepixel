@@ -3,11 +3,6 @@ import sys
 import cv2
 
 sys.path.insert(0, '../utils/')
-import config
-
-data_dir = config.data_dir
-dataset  = config.dataset
-num_classes = config.num_classes
 
 def read_and_decode(filename_queue):
 
@@ -16,37 +11,32 @@ def read_and_decode(filename_queue):
    features = tf.parse_single_example(
       serialized_example,
       features={
-         'image': tf.FixedLenFeature([], tf.string),
+         'hd_image': tf.FixedLenFeature([], tf.string),
+         'img': tf.FixedLenFeature([], tf.string),
       }
    )
 
-   image = tf.decode_raw(features['image'], tf.uint8)
-   image = tf.to_float(image, name='float32')
+   hd_image = tf.decode_raw(features['hd_image'], tf.uint8)
+   hd_image = tf.to_float(hd_image, name='float32')
+   hd_image = tf.reshape(hd_image, [1280,720,3])
    
-   image = tf.reshape(image, [128,128,3])
-   # do some distortions here later
+   img = tf.decode_raw(features['img'], tf.uint8)
+   img = tf.to_float(img, name='float32')
+   img = tf.reshape(img, [160,144,3])
 
-   return image
+   return img, hd_image
 
 
-def inputs(type_input, batch_size):
-   if type_input == "train":
-      filename = data_dir+"/"+dataset+"/records/train.tfrecord"
-   elif type_input == "test":
-      filename = data_dir+"/"+dataset+"/records/test.tfrecord"
+def inputs(record_file, batch_size, type_):
+   filename_queue = tf.train.string_input_producer([record_file])
 
-   filename_queue = tf.train.string_input_producer([filename])
+   img, hd_image = read_and_decode(filename_queue)
 
-   image = read_and_decode(filename_queue)
-   '''
-   images = tf.train.shuffle_batch([image], 
+   imgs, hd_images = tf.train.shuffle_batch([img, hd_image], 
       batch_size=batch_size, 
       num_threads=5,
       capacity=1000+3*batch_size, 
       min_after_dequeue=1000)
-   '''
-   images = tf.train.batch([image],
-      batch_size=batch_size,
-      num_threads=2)
-   return images
+   
+   return imgs, hd_images
 

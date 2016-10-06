@@ -1,22 +1,15 @@
 import tensorflow as tf
 import numpy as np
 import sys
-sys.path.insert(0, '../utils/')
-import config
 
 FLAGS = tf.app.flags.FLAGS
 
 num_epochs = 100
 
-tf.app.flags.DEFINE_integer('batch_size', config.batch_size,
-                            """Number of images to process in a batch.""")
 tf.app.flags.DEFINE_float('weight_decay', 0.0005,
                           """ """)
 tf.app.flags.DEFINE_float('alpha', 0.1,
                           """Leaky RElu param""")
-
-data_dir = config.data_dir
-num_classes = config.num_classes
 
 def _variable_on_cpu(name, shape, initializer):
    with tf.device('/cpu:0'):
@@ -90,16 +83,21 @@ def deconv(inputs, stride, out_shape, kernel_size, num_features, idx):
       return tf.maximum(FLAGS.alpha*d_conv,d_conv,name=str(idx))
 
 def inference(images, name):
-           # input, kernel size, stride, num_features, num_epochs
-   conv1 = tf.nn.dropout(images, .8)
-   conv1 = _conv_layer(conv1, 7, 2, 32, '1')
 
-   # perform a 20% dropout after the first layer
+           # input, kernel size, stride, num_features, num_
+   #conv1 = tf.nn.dropout(images, .8)
+   conv1 = _conv_layer(images, 7, 2, 32, '1')
 
-   conv2 = _conv_layer(conv1, 2, 2, 32, '2')
+   conv2 = _conv_layer(conv1, 3, 1, 64, '2')
 
-   conv3 = _conv_layer(conv2, 5, 2, 64, '3')
+   conv3 = _conv_layer(conv2, 3, 1, 128, '3')
    
+   conv4 = _conv_layer(conv3, 3, 1, 256, '4')
+   print conv4
+   '''
+   print conv4
+   exit()
+
    fc4 = _fc_layer(conv3, 1024, '4', True, False)
    
    fc5 = _fc_layer(fc4, 512, '5', False, False)
@@ -112,22 +110,33 @@ def inference(images, name):
    fc8 = _fc_layer(fc7, 1024, '8', False, False)
    
    fc9 = _fc_layer(fc8, 16*16*64, '9', False, False)
-   
+   '''
    # reshape fc9
-   fc9 = tf.reshape(fc9, [config.batch_size, 16, 16, 64])
+   #fc9 = tf.reshape(fc9, [10, 16, 16, 64])
 
    # perform deconvolutions
-   # output shape is the output shape of conv2
-   out_shape = tf.pack([config.batch_size, 32, 32, 32])
-   d_conv9 = deconv(fc9, 2, out_shape, 5, 32, '10')
 
-   out_shape = tf.pack([config.batch_size, 64, 64, 32])
-   d_conv10 = deconv(d_conv9, 2, out_shape, 2, 32, '11')
+   out_shape = tf.pack([10, 64, 64, 32])
+   d_conv1 = deconv(conv4, 2, out_shape, 5, 32, '5') 
+   print d_conv1
 
-   out_shape = tf.pack([config.batch_size, 128, 128, 3])
-   d_conv11 = deconv(d_conv10, 2, out_shape, 7, 3, '13')
+   out_shape = tf.pack([10, 128, 128, 32])
+   d_conv2 = deconv(d_conv1, 2, out_shape, 2, 32, '6')
+   print d_conv2
 
-   return d_conv11
+   out_shape = tf.pack([10, 256, 256, 3])
+   d_conv3 = deconv(d_conv2, 2, out_shape, 7, 3, '7')
+   print d_conv3
+   
+   out_shape = tf.pack([10, 512, 512, 3])
+   d_conv4 = deconv(d_conv3, 2, out_shape, 7, 3, '8')
+   print d_conv4
+
+   out_shape = tf.pack([10, 1280, 720, 3])
+   d_conv5 = deconv(d_conv4, 2, out_shape, 7, 3, '9')
+   print d_conv5
+
+   return d_conv5
 
 def loss (input_images, logits):
    error = tf.nn.l2_loss(input_images - logits)
