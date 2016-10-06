@@ -37,19 +37,31 @@ def run(folder, dest_dir):
             fileList.append(os.path.join(d,filename))
 
    for image_name in tqdm(fileList):
-      # read image
-      img = cv2.imread(image_name)
+      
+      try:
+         img = cv2.imread(image_name)
+      except:
+         print "corrupt image: " + str(image_name)
+         continue
 
       # make a copy of the image for the desired output of the network
-      hd_img = img.copy()
+      try:
+         hd_img = img.copy()
+      except:
+         print "Couldn't copy image " + str(image_name)
+         pass
       
       # resize to be 720p
-      hd_img = cv2.resize(img, out_shape, interpolation=cv2.INTER_CUBIC)
-      hd_height, hd_width, hd_channels = hd_img.shape
+      try:
+         hd_img = cv2.resize(img, out_shape, interpolation=cv2.INTER_CUBIC)
+         hd_height, hd_width, hd_channels = hd_img.shape
 
-      # resize to gameboy color dimensions
-      img = cv2.resize(img, in_shape, interpolation=cv2.INTER_CUBIC)
-      height, width, channels = img.shape
+         # resize to gameboy color dimensions
+         img = cv2.resize(img, in_shape, interpolation=cv2.INTER_CUBIC)
+         height, width, channels = img.shape
+      except:
+         print "Error with " + str(image_name)
+         continue
 
       # change to 15-bit colorspace
       for i in range(0, height):
@@ -78,6 +90,8 @@ def run(folder, dest_dir):
       except:
          raise
       count += 1
+   if count == 200:
+      exit()
    print "Created " + str(count) + " records"
 
 if __name__ == "__main__":
