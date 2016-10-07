@@ -109,7 +109,7 @@ def PS(X, r, color=False):
         X = _phase_shift(X, r)
     return X
 
-def inference(images, name):
+def inference(batch_size, images, name):
 
            # input, kernel size, stride, num_features, num_
    #conv1 = tf.nn.dropout(images, .8)
