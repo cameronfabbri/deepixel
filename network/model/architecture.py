@@ -72,68 +72,69 @@ def _fc_layer(inputs, hiddens, idx, flat = False, linear = False):
     ip = tf.add(tf.matmul(inputs_processed,weights),biases)
     return tf.maximum(FLAGS.alpha*ip,ip,name=str(idx)+'_fc')
 
-def deconv(inputs, stride, out_shape, kernel_size, num_features, idx):
+def deconv(inputs, stride, out_shape, kernel_size, num_features, idx, linear=False):
    with tf.variable_scope('fc{0}'.format(idx)) as scope:
       input_channels = inputs.get_shape()[3]
 
       filter_ = _variable_with_weight_decay('weights', shape=[kernel_size, kernel_size, num_features, input_channels], stddev=0.1, wd=FLAGS.weight_decay)
       strides=[1, stride, stride, 1]
 
-      d_conv = tf.nn.conv2d_transpose(inputs, filter_, output_shape=out_shape, strides=strides, padding='SAME') 
-      return tf.maximum(FLAGS.alpha*d_conv,d_conv,name=str(idx))
+      d_conv = tf.nn.conv2d_transpose(inputs, filter_, output_shape=out_shape, strides=strides, padding='SAME')
+
+      if linear:
+        return d_conv
+      else:
+        # activation function is lrelu as seen in super res paper
+        leak = 0.2
+        f1 = 0.5 * (1 + leak)
+        f2 = 0.5 * (1 - leak)
+        return f1 * d_conv + f2 * abs(d_conv)
+
+def _phase_shift(I, r):
+    bsize, a, b, c = I.get_shape().as_list()
+    bsize = tf.shape(I)[0] # Handling Dimension(None) type for undefined batch dim
+    X = tf.reshape(I, (bsize, a, b, r, r))
+    X = tf.transpose(X, (0, 1, 2, 4, 3))  # bsize, a, b, 1, 1
+    X = tf.split(1, a, X)  # a, [bsize, b, r, r]
+    X = tf.concat(2, [tf.squeeze(x) for x in X])  # bsize, b, a*r, r
+    X = tf.split(1, b, X)  # b, [bsize, a*r, r]
+    X = tf.concat(2, [tf.squeeze(x) for x in X])  # bsize, a*r, b*r
+    return tf.reshape(X, (bsize, a*r, b*r, 1))
+
+def PS(X, r, color=False):
+    if color:
+        Xc = tf.split(3, 3, X)
+        X = tf.concat(3, [_phase_shift(x, r) for x in Xc])
+    else:
+        X = _phase_shift(X, r)
+    return X
 
 def inference(images, name):
 
            # input, kernel size, stride, num_features, num_
    #conv1 = tf.nn.dropout(images, .8)
    print images
-   conv1 = _conv_layer(images, 3, 1, 32, '1')
+   out_shape = tf.pack([images.get_shape()[0], 160, 144, 64])
+   d_conv1 = deconv(images, 1, out_shape, 5, 64, '1') 
 
-   conv2 = _conv_layer(conv1, 3, 1, 64, '2')
+   out_shape = tf.pack([images.get_shape()[0], 160, 144, 64])
+   d_conv2 = deconv(d_conv1, 1, out_shape, 5, 64, '2') 
+   print(d_conv2.get_shape())
 
-   conv3 = _conv_layer(conv2, 3, 1, 128, '3')
-   
-   conv4 = _conv_layer(conv3, 3, 1, 256, '4')
-   print conv4
-   print "here"
-   '''
-   print conv4
-   exit()
+   out_shape = tf.pack([images.get_shape()[0], 160, 144, 3*64])
+   d_conv3 = deconv(d_conv2, 1, out_shape, 5, 3*64, '3', True)
+   print(d_conv3.get_shape())
+   d_conv3 = PS(d_conv3, 8, color=True)
+   d_conv3 = tf.nn.tanh(d_conv3)
+   print(d_conv3.get_shape())
 
-   fc4 = _fc_layer(conv3, 1024, '4', True, False)
-   
-   fc5 = _fc_layer(fc4, 512, '5', False, False)
-  
-   fc6 = _fc_layer(fc5, 256, '6', False, False)
-
-   # convert last layer to image
-   fc7 = _fc_layer(fc6, 512, '7', False, False)
-   
-   fc8 = _fc_layer(fc7, 1024, '8', False, False)
-   
-   fc9 = _fc_layer(fc8, 16*16*64, '9', False, False)
-   '''
-   # reshape fc9
-   #fc9 = tf.reshape(fc9, [10, 16, 16, 64])
-
-   # perform deconvolutions
-
-   out_shape = tf.pack([10, 320, 288, 32])
-   d_conv1 = deconv(conv4, 2, out_shape, 5, 32, '5') 
-   print d_conv1
-
-   out_shape = tf.pack([10, 640, 576, 32])
-   d_conv2 = deconv(d_conv1, 2, out_shape, 2, 32, '6')
-   print d_conv2
-
-   out_shape = tf.pack([10, 1280, 1152, 3])
-   d_conv3 = deconv(d_conv2, 2, out_shape, 7, 3, '7')
-   print d_conv3
-   
    return d_conv3
 
-def loss (input_images, logits):
-   error = tf.nn.l2_loss(input_images - logits)
+def loss (input_images, predicted_images):
+   ### possible loss cross entropy loss ###
+   #epsilon = 1e-12 
+   #error = tf.reduce_mean(-(input_images * tf.log(predicted_images + epsilon) + (1.0 - input_images) * tf.log(1.0 - predicted_images + epsilon)))
+   error = tf.nn.l2_loss(input_images - predicted_images)
    return error 
 
 
