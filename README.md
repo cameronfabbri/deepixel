@@ -4,18 +4,17 @@ This is a deep learning approach to depixelizing images, with a goal to fully in
 it into an emulator to provide real-time HD gameplay.
 
 ## Approach
-The idea is to generate pixelated versions of high definition images from side-scrolling video
-games and cartoons to use as a training set. The pixelated image will serve as the input to the
-network, and the output will be compared with the original unpixelated image. The hope is that 
-the pixelated images will be representative of the retro versions of Gameboy Color games, so that 
-after the network learns to depixelate the image, it can be applied to older video games.
+The idea is to resize high definition images from side-scrolling video games to the original
+Gameboy Color resolution (160,144) to use as a training set. The resized HD image will serve as the input to the
+network, and the output will be compared with the original unsized image.
 
 ### Original image taken from Donkey Kong Country Tropical Freeze Wii U
-![origanl](https://github.com/cameronfabbri/deepixel/blob/master/images/output-original.png?raw=true)
+![original](https://github.com/cameronfabbri/deepixel/blob/master/images/output-original.png?raw=true)
 
-### Pixelated image taken from Donkey Kong Country Tropical Freeze Wii U
-![pixelated](https://github.com/cameronfabbri/deepixel/blob/master/images/output-6.png?raw=true)
+### Resized Donkey Kong Country Tropical Freeze 
+![gbco](https://raw.githubusercontent.com/cameronfabbri/deepixel/master/images/oo_.png)
 
 ### Original image taken from Donkey Kong Country Gameboy Color
-![gbc](http://199.101.98.242/media/images/33501-Donkey_Kong_Country_(Europe)_(En,Fr,De)-3.jpg)
+![gbc](https://raw.githubusercontent.com/cameronfabbri/deepixel/master/images/dk2.png)
+
 
