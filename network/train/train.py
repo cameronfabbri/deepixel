@@ -23,23 +23,25 @@ def train(checkpoint_dir, record_file, batch_size):
 
       gameboy_images, hd_images = input_.inputs(record_file, batch_size, "train")
 
+      # image summary for tensorboard
+      tf.image_summary('gameboy_images', gameboy_images, max_images=100)
+      tf.image_summary('hd_images', hd_images, max_images=100)
+
       logits = architecture.inference(batch_size, gameboy_images, "train")
 
       # loss is the l2 norm of my input vector (the image) and the output vector (generated image)
       loss = architecture.loss(hd_images, logits)
+      tf.scalar_summary('loss', loss)
       
       train_op = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(loss, global_step=global_step)
+
+      # summary for tensorboard graph
+      summary_op = tf.merge_all_summaries()
 
       variables = tf.all_variables()
       init      = tf.initialize_all_variables()
       sess      = tf.Session()
 
-      # image summary for tensorboard
-      image_summary_t = tf.image_summary('images', gameboy_images, max_images=100)
-
-      # summary for tensorboard graph
-      summary_op = tf.merge_all_summaries()
-    
       try:
          os.mkdir(checkpoint_dir)
       except:
@@ -48,13 +50,12 @@ def train(checkpoint_dir, record_file, batch_size):
       sess.run(init)
       print "\nRunning session\n"
 
-      graph_def = sess.graph.as_graph_def(add_shapes=True)
-      summary_writer = tf.train.SummaryWriter(checkpoint_dir+"training", graph_def=graph_def)
 
       # saver for the model
       saver = tf.train.Saver(tf.all_variables())
       
       tf.train.start_queue_runners(sess=sess)
+
 
       # restore previous model if one
       ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
@@ -67,22 +68,31 @@ def train(checkpoint_dir, record_file, batch_size):
             print "Could not restore model"
             pass
 
+
+      # Summary op
+      graph_def = sess.graph.as_graph_def(add_shapes=True)
+      summary_writer = tf.train.SummaryWriter(checkpoint_dir+"training", graph_def=graph_def)
+
+      # Constants
       step = int(sess.run(global_step))
       epoch_num = step/(train_size/batch_size)
 
       while True:
-         _, loss_value, generated_image, imgs = sess.run([train_op, loss, logits, hd_images])
-         print "Epoch: " + str(epoch_num) + " Step: " + str(sess.run(global_step)) + " Loss: " + str(loss_value)
+         _, loss_value = sess.run([train_op, loss])
          step += 1
          
-         # save for tensorboard
-         if step%(train_size/batch_size) == 0:
+         # save tensorboard stuff
+         if step%200 == 0:
+            print "Epoch: " + str(epoch_num) + " Step: " + str(sess.run(global_step)) + " Loss: " + str(loss_value)
             summary_str = sess.run(summary_op)
             summary_writer.add_summary(summary_str, step)
-
+         # save checkpoint
+         #if step%(train_size/batch_size) == 0:
+         if step%1000 == 0:
             print "Finished epoech " + str(epoch_num) + " ....saving model"
             print
-            saver.save(sess, checkpoint_dir+"epoch-"+str(epoch_num), global_step=global_step)
+            #saver.save(sess, checkpoint_dir+"epoch-"+str(epoch_num), global_step=global_step)
+            saver.save(sess, checkpoint_dir+"training/checkpoint", global_step=global_step)
             print
 
 def main(argv=None):

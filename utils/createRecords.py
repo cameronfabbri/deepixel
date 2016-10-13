@@ -8,7 +8,7 @@ import os
 import fnmatch
 
 in_shape  = (160,144)
-out_shape = (1280, 1152)
+out_shape = (640,576)
 
 # helper function
 def _bytes_feature(value):
@@ -35,6 +35,7 @@ def run(folder, dest_dir):
       for filename in fList:
          if fnmatch.fnmatch(filename, pattern):
             fileList.append(os.path.join(d,filename))
+   print(fileList)
 
    for image_name in tqdm(fileList):
       

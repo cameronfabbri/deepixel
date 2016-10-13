@@ -12,7 +12,7 @@ tf.app.flags.DEFINE_float('alpha', 0.1,
                           """Leaky RElu param""")
 
 def _variable_on_cpu(name, shape, initializer):
-   with tf.device('/cpu:0'):
+   with tf.device('/gpu:0'):
       var = tf.get_variable(name, shape, initializer=initializer)
    return var
 
@@ -114,19 +114,21 @@ def inference(batch_size, images, name):
            # input, kernel size, stride, num_features, num_
    #conv1 = tf.nn.dropout(images, .8)
    print images
-   out_shape = tf.pack([images.get_shape()[0], 160, 144, 64])
+   out_shape = tf.pack([images.get_shape()[0], 144, 160, 64])
    d_conv1 = deconv(images, 1, out_shape, 5, 64, '1') 
 
-   out_shape = tf.pack([images.get_shape()[0], 160, 144, 64])
+   out_shape = tf.pack([images.get_shape()[0], 144, 160, 64])
    d_conv2 = deconv(d_conv1, 1, out_shape, 5, 64, '2') 
    print(d_conv2.get_shape())
 
-   out_shape = tf.pack([images.get_shape()[0], 160, 144, 3*64])
-   d_conv3 = deconv(d_conv2, 1, out_shape, 5, 3*64, '3', True)
+   out_shape = tf.pack([images.get_shape()[0], 144, 160, 3*16])
+   d_conv3 = deconv(d_conv2, 1, out_shape, 5, 3*16, '3', True)
    print(d_conv3.get_shape())
-   d_conv3 = PS(d_conv3, 8, color=True)
+   d_conv3 = PS(d_conv3, 4, color=True)
+   #d_conv3 = tf.nn.sigmoid(d_conv3)
    d_conv3 = tf.nn.tanh(d_conv3)
    print(d_conv3.get_shape())
+   tf.image_summary("generated", d_conv3, max_images=100) 
 
    return d_conv3
 
