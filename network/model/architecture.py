@@ -12,7 +12,7 @@ tf.app.flags.DEFINE_float('alpha', 0.1,
                           """Leaky RElu param""")
 
 def _variable_on_cpu(name, shape, initializer):
-   with tf.device('/gpu:0'):
+   with tf.device('/cpu:0'):
       var = tf.get_variable(name, shape, initializer=initializer)
    return var
 
@@ -116,6 +116,7 @@ def inference(batch_size, images, name):
    print images
    out_shape = tf.pack([images.get_shape()[0], 144, 160, 64])
    d_conv1 = deconv(images, 1, out_shape, 5, 64, '1') 
+   print d_conv1.get_shape() 
 
    out_shape = tf.pack([images.get_shape()[0], 144, 160, 64])
    d_conv2 = deconv(d_conv1, 1, out_shape, 5, 64, '2') 
