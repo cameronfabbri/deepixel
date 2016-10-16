@@ -38,8 +38,8 @@ def inputs(record_file, batch_size, type_):
    imgs, hd_images = tf.train.shuffle_batch([img, hd_image], 
       batch_size=batch_size, 
       num_threads=5,
-      capacity=500+3*batch_size, 
-      min_after_dequeue=500)
+      capacity=100+3*batch_size, 
+      min_after_dequeue=100)
    
    return imgs, hd_images
 

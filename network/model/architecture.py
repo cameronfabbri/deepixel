@@ -12,7 +12,7 @@ tf.app.flags.DEFINE_float('alpha', 0.1,
                           """Leaky RElu param""")
 
 def _variable_on_cpu(name, shape, initializer):
-   with tf.device('/cpu:0'):
+   with tf.device('/gpu:0'):
       var = tf.get_variable(name, shape, initializer=initializer)
    return var
 
