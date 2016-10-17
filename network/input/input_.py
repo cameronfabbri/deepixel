@@ -18,14 +18,14 @@ def read_and_decode(filename_queue):
 
    hd_image = tf.decode_raw(features['hd_image1'], tf.uint8)
    hd_image = tf.to_float(hd_image, name='float32')
-   #hd_image = tf.reshape(hd_image, [576,640,3])
-   hd_image = tf.reshape(hd_image, [640,576,3])
+   hd_image = tf.reshape(hd_image, [576,640,3])
+   #hd_image = tf.reshape(hd_image, [640,576,3])
    #hd_image = hd_image/255.0
    
    img = tf.decode_raw(features['img'], tf.uint8)
    img = tf.to_float(img, name='float32')
-   #img = tf.reshape(img, [144,160,3])
-   img = tf.reshape(img, [160,144,3])
+   img = tf.reshape(img, [144,160,3])
+   #img = tf.reshape(img, [160,144,3])
    img = tf.image.per_image_whitening(img)
    #img = img/255.0
 
