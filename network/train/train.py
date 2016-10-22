@@ -58,7 +58,7 @@ def train(checkpoint_dir, record_file, batch_size, color):
 
 
       # restore previous model if one
-      ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
+      ckpt = tf.train.get_checkpoint_state(checkpoint_dir+"training/")
       if ckpt and ckpt.model_checkpoint_path:
          print "Restoring previous model..."
          try:
@@ -81,13 +81,12 @@ def train(checkpoint_dir, record_file, batch_size, color):
          _, loss_value = sess.run([train_op, loss])
          step += 1
          
+         print "Epoch: " + str(epoch_num) + " Step: " + str(sess.run(global_step)) + " Loss: " + str(loss_value)
          # save tensorboard stuff
          if step%200 == 0:
-            print "Epoch: " + str(epoch_num) + " Step: " + str(sess.run(global_step)) + " Loss: " + str(loss_value)
             summary_str = sess.run(summary_op)
             summary_writer.add_summary(summary_str, step)
          # save checkpoint
-         #if step%(train_size/batch_size) == 0:
          if step%1000 == 0:
             print "Finished epoech " + str(epoch_num) + " ....saving model"
             print

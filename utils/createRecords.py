@@ -8,7 +8,8 @@ import os
 import fnmatch
 
 in_shape  = (160,144)
-out_shape = (640,576)
+out_shape1 = (640,576)
+out_shape2 = (800,720)
 
 # helper function
 def _bytes_feature(value):
@@ -35,7 +36,6 @@ def run(folder, dest_dir):
       for filename in fList:
          if fnmatch.fnmatch(filename, pattern):
             fileList.append(os.path.join(d,filename))
-   print(fileList)
 
    for image_name in tqdm(fileList):
       
@@ -52,10 +52,12 @@ def run(folder, dest_dir):
          print "Couldn't copy image " + str(image_name)
          pass
       
-      # resize to be 720p
       try:
-         hd_img = cv2.resize(img, out_shape, interpolation=cv2.INTER_CUBIC)
-         hd_height, hd_width, hd_channels = hd_img.shape
+         hd_img1 = cv2.resize(img, out_shape1, interpolation=cv2.INTER_CUBIC)
+         hd_img2 = cv2.resize(img, out_shape2, interpolation=cv2.INTER_CUBIC)
+         
+         hd_height1, hd_width1, hd_channels1 = hd_img1.shape
+         hd_height2, hd_width2, hd_channels2 = hd_img2.shape
 
          # resize to gameboy color dimensions
          img = cv2.resize(img, in_shape, interpolation=cv2.INTER_CUBIC)
@@ -64,6 +66,7 @@ def run(folder, dest_dir):
          print "Error with " + str(image_name)
          continue
 
+      '''
       # change to 15-bit colorspace
       for i in range(0, height):
          for j in range(0, width):
@@ -75,15 +78,17 @@ def run(folder, dest_dir):
             b_p = (b*31/255)*(255/31)
 
             img[i,j] = [r_p, g_p, b_p]
-            
+      '''      
       # flatten image
       img_flat = np.reshape(img, [1, in_shape[0]*in_shape[1]*3])
 
       # flatten hd image
-      hd_img_flat = np.reshape(hd_img, [1, hd_height*hd_width*3])
+      hd_img_flat1 = np.reshape(hd_img1, [1, hd_height1*hd_width1*3])
+      hd_img_flat2 = np.reshape(hd_img2, [1, hd_height2*hd_width2*3])
 
       example = tf.train.Example(features=tf.train.Features(feature={
-         'hd_image': _bytes_feature(hd_img_flat.tostring()),
+         'hd_image1': _bytes_feature(hd_img_flat1.tostring()),
+         'hd_image2': _bytes_feature(hd_img_flat2.tostring()),
          'img'     : _bytes_feature(img_flat.tostring())}))
 
       try:
