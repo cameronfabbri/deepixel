@@ -29,11 +29,14 @@ def read_and_decode(filename_queue):
    return img, hd_image
 
 
-def inputs(record_file, batch_size, type_):
+def inputs(record_file, batch_size, color, type_):
    print(record_file)
    filename_queue = tf.train.string_input_producer([record_file])
 
    img, hd_image = read_and_decode(filename_queue)
+   if color == "grayscale":
+     img = tf.image.rgb_to_grayscale(img)
+     hd_image = tf.image.rgb_to_grayscale(hd_image)
 
    imgs, hd_images = tf.train.shuffle_batch([img, hd_image], 
       batch_size=batch_size, 

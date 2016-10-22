@@ -13,7 +13,7 @@ import input_
 import architecture
 import time
 
-def train(checkpoint_dir, record_file, batch_size):
+def train(checkpoint_dir, record_file, batch_size, color):
    with tf.Graph().as_default():
 
       batch_size = int(batch_size)
@@ -21,7 +21,7 @@ def train(checkpoint_dir, record_file, batch_size):
 
       train_size = 148623
 
-      gameboy_images, hd_images = input_.inputs(record_file, batch_size, "train")
+      gameboy_images, hd_images = input_.inputs(record_file, batch_size, color, "train")
 
       # image summary for tensorboard
       tf.image_summary('gameboy_images', gameboy_images, max_images=100)
@@ -99,6 +99,7 @@ def main(argv=None):
    parser = OptionParser(usage="usage")
    parser.add_option("-c", "--checkpoint_dir",          type="str")
    parser.add_option("-r", "--record_file",             type="str")
+   parser.add_option("-o", "--color",     default=True, type="str")
    parser.add_option("-b", "--batch_size", default=100, type="int")
 
    opts, args = parser.parse_args()
@@ -106,6 +107,7 @@ def main(argv=None):
 
    checkpoint_dir = opts['checkpoint_dir']
    batch_size     = opts['batch_size']
+   color          = opts['color']
    record_file    = opts['record_file']
 
    if not os.path.isfile(record_file):
@@ -119,6 +121,7 @@ def main(argv=None):
    print
    print "checkpoint_dir: " + str(checkpoint_dir)
    print "record_file:    " + str(record_file)
+   print "color:     "      + str(color)
    print "batch_size:     " + str(batch_size)
    print
 
@@ -126,7 +129,7 @@ def main(argv=None):
    if answer == "n":
       exit()
 
-   train(checkpoint_dir, record_file, batch_size)
+   train(checkpoint_dir, record_file, batch_size, color)
 
 
 if __name__ == "__main__":
@@ -135,6 +138,7 @@ if __name__ == "__main__":
       print
       print "-c --checkpoint_dir <str> [path to save the model]"
       print "-r --record_file    <str> [path to the record file]"
+      print "-o --color          <str> [whether color or black and white]"
       print "-b --batch_size     <int> [batch size]"
       print
       exit()

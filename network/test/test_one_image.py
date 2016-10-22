@@ -54,12 +54,9 @@ def test(checkpoint_dir, record_file, image_path):
       print(img)
       img = cv2.resize(img, (160,144)) / 255.0
       #img = np.transpose(img, (1,0,2))
-      print img.shape
       fake = np.zeros((10,144,160,3))
       fake[0,:,:,:] = img
       high_res = sess.run([logits],feed_dict={input_image:fake})[0]
-      print(np.max(high_res))
-      print(np.min(high_res))
       high_res = np.uint8(np.maximum(high_res,0)*255)
       cv2.imwrite('hd_mario.jpg', high_res[0,:,:,:])
       
